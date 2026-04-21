@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: whatsapp-appointment-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5-mini
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: TWILIO_VALIDATE_SIGNATURE
+        value: "true"
+      - key: BUSINESS_NAME
+        sync: false
+      - key: BUSINESS_TYPE
+        sync: false
+      - key: BUSINESS_LOCATION
+        sync: false
+      - key: BUSINESS_HOURS
+        sync: false
+      - key: BUSINESS_CONTACT_PERSON
+        sync: false
+      - key: BUSINESS_TIMEZONE
+        value: Asia/Kolkata
+      - key: FLASK_DEBUG
+        value: "false"
+
+  - type: web
+    name: whatsapp-appointment-dashboard
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python dashboard_start.py
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          name: whatsapp-appointment-api
+          type: web
+          envVarKey: DATABASE_URL
